@@ -18,9 +18,15 @@
     <ClCompile Include="Genetic5.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="PSO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Genetic5.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PSO.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

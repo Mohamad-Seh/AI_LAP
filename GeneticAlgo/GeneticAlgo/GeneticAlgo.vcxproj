@@ -124,9 +124,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Genetic5.cpp" />
+    <ClCompile Include="PSO.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Genetic5.h" />
+    <ClInclude Include="PSO.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
