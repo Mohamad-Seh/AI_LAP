@@ -379,7 +379,6 @@ int* selectParents(ga_vector &population)
 }
 
 //*******************************************************************************
-
 void mate(ga_vector &population, ga_vector &buffer, int PointOp)
 {
 	int esize = static_cast<int>(GA_POPSIZE * GA_ELITRATE);
@@ -388,8 +387,8 @@ void mate(ga_vector &population, ga_vector &buffer, int PointOp)
 	elitism(population, buffer, esize);
 	// Mate the rest
 	for (int i = esize; i < GA_POPSIZE; i++) {
-		i1 = parents[2 * (i - esize)];
-		i2 = parents[2 * (i - esize) + 1];
+		i1 = rand() % (GA_POPSIZE / 2);
+		i2 = rand() % (GA_POPSIZE / 2);
 		if (PointOp == 0) // Single Point Operator
 
 		{
@@ -431,7 +430,7 @@ void mate(ga_vector &population, ga_vector &buffer, int PointOp)
 //*******************************************************************************
 //main function 
  
-#define PSOflag          0  // if psoflag == 1 pso algorithim will run else GA algorithim will run
+#define PSOflag          0 // if psoflag == 1 pso algorithim will run else GA algorithim will run
 
 int main()
 {
@@ -467,7 +466,7 @@ int main()
 
 		if ((*population)[0].fitness == 0) break;
 		// mate the population together
-		mate(*population, *buffer,1);		// population,buffer, PointOp : -1 is uniform , 0 for one point , 1 for two points
+		mate(*population, *buffer,0);		// population,buffer, PointOp : -1 is uniform , 0 for one point , 1 for two points
 		swap(population, buffer);		// swap buffers
 		//clock calculation
 		clock_t end = std::clock();
