@@ -1,1 +1,7 @@
-﻿  GeneticAlgo.vcxproj -> C:\REPO\AI_LAP\GeneticAlgo\Debug\GeneticAlgo.exe
+﻿  Genetic5.cpp
+c:\repo\ai_lap\geneticalgo\geneticalgo\genetic5.cpp(263): warning C4244: 'argument': conversion from 'double' to '_Elem', possible loss of data
+          with
+          [
+              _Elem=char
+          ]
+  GeneticAlgo.vcxproj -> C:\REPO\AI_LAP\GeneticAlgo\Debug\GeneticAlgo.exe
