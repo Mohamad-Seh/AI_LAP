@@ -1,0 +1,3 @@
+﻿  NQueens.cpp
+c:\repo\ai_lap\nqueens\nqueens\nqueens.cpp(378): warning C4018: '<': signed/unsigned mismatch
+  Nqueens.vcxproj -> C:\REPO\AI_LAP\Nqueens\Debug\Nqueens.exe
