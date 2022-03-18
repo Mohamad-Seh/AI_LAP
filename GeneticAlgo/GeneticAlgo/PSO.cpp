@@ -1,6 +1,5 @@
 
 #include "PSO.h"
-
 PSO::PSO()
 {
 	int tsize = GA_TARGET.size();
@@ -63,6 +62,7 @@ string PSO::get_velocity()
 
 int PSO::calc_fitness_particle(string citizenStr)
 {
+	//same method as normal fitness calculation
 	string target = GA_TARGET;
 	int tsize = target.size();
 	unsigned int fitness;

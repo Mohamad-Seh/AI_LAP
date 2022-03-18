@@ -226,15 +226,11 @@ string globalBest;						   // for global best
 
 void PSOrun()
 {
-	//initlizing global
+	//initlizing paramaters and global
 	int tsize = GA_TARGET.size();
 	globalBest.erase();
-
 	for (int j = 0; j < tsize; j++)
 		globalBest += (rand() % 90) + 32;
-
-	// for initlizing the global , local and velocity randomly
-
 	for (int i = 0; i < GA_POPSIZE; i++) {
 		PSO particle;
 		particle_vector.push_back(particle);
@@ -245,7 +241,7 @@ void PSOrun()
 		}
 	}						
 
-	PSO global_particle;			// for calculating the fitness of the global particle
+	PSO global_particle;		
 	int k = 0;
 	while (k < GA_MAXITER && global_particle.calc_fitness_particle(globalBest) != 0)
 	{
@@ -420,12 +416,11 @@ int* Aging(ga_vector &population)
 	return parents;
 }
 
-//*******************************************************************************
 
 //*******************************************************************************
 //main function 
  
-#define PSOflag          0  // if psoflag == 1 pso algorithim will run else GA algorithim will run
+#define PSOflag          1  // if psoflag == 1 pso algorithim will run else GA algorithim will run
 
 int main()
 {
@@ -453,15 +448,17 @@ int main()
 	}
 	for (int i = 0; i < GA_MAXITER; i++) {
 		clock_t start = std::clock();
-		calc_fitness(*population, 3);		// calculate fitness
-		sort_by_fitness(*population);	// sort them
+		// // calculate fitness 
+		calc_fitness(*population,1);		 // population and method 0 for nromal else for Bullseye method
+		// sort them
+		sort_by_fitness(*population);	
 		print_best(*population);		// print the best one
 
 		if ((*population)[0].fitness == 0) break;
-
-		mate(*population, *buffer, -1);		// mate the population together
+		// mate the population together
+		mate(*population, *buffer, 1);		// population,buffer, PointOp : -1 is uniform , 0 for one point , 1 for two points
 		swap(population, buffer);		// swap buffers
-
+		//clock calculation
 		clock_t end = std::clock();
 		float toatl_time = (float)(end - start) / CLOCKS_PER_SEC;
 		numOfGenerations++;
