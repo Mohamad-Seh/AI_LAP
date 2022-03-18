@@ -1,5 +1,5 @@
 ﻿  Genetic5.cpp
-c:\repo\ai_lap\geneticalgo\geneticalgo\genetic5.cpp(263): warning C4244: 'argument': conversion from 'double' to '_Elem', possible loss of data
+c:\repo\ai_lap\geneticalgo\geneticalgo\genetic5.cpp(212): warning C4244: 'argument': conversion from 'double' to '_Elem', possible loss of data
           with
           [
               _Elem=char

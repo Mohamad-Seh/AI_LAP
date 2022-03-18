@@ -152,57 +152,6 @@ void mutate(ga_struct &member)
 	member.str[ipos] = ((member.str[ipos] + delta) % 122);
 }
 
-//***************************************************************************************************
-
-void mate(ga_vector &population, ga_vector &buffer, int PointOp)
-{
-	int esize = (int) GA_POPSIZE * (int)GA_ELITRATE;
-	int tsize = GA_TARGET.size(), spos, i1, i2;
-	int spos2;
-	string str1, str2, str3;
-	elitism(population, buffer, esize);
-
-	// Mate the rest
-
-	for (int i = esize; i < GA_POPSIZE; i++) {
-		i1 = rand() % (GA_POPSIZE / 2);
-		i2 = rand() % (GA_POPSIZE / 2);
-		if(PointOp == 0) // one point
-		{
-			spos = rand() % tsize;
-
-			buffer[i].str = population[i1].str.substr(0, spos) +
-				population[i2].str.substr(spos, tsize - spos);
-		}
-		if (PointOp == 1) // two point
-		{
-			int curr_max, curr_min;
-			spos = rand() % tsize;
-			spos2 = rand() % tsize;
-			curr_max = std::max(spos, spos2);
-			curr_min = std::min(spos, spos2);
-			str1 = population[i1].str.substr(0, curr_min);
-			str2 = population[i2].str.substr(curr_min, curr_max - curr_min);
-			str3 = population[i1].str.substr(curr_max, tsize - curr_max);
-			buffer[i].str = str1 + str2 + str3;
-		}
-		if (PointOp == -1) // uniform 
-		{
-			string new_str;
-			new_str.erase();
-			for (int j = 0; j < tsize; j++)
-			{
-				spos = rand() % 2;
-				if (spos == 0)
-					new_str += population[i1].str.substr(j, 1);
-				else
-					new_str += population[i2].str.substr(j, 1);
-			}
-			buffer[i].str = new_str;
-		}
-		if (rand() < GA_MUTATION) mutate(buffer[i]);
-	}
-}
 
 //****************************************************************************************************
 
@@ -273,8 +222,6 @@ void PSOrun()
 				< particle_vector[i].calc_fitness_particle(particle_vector[i].get_localBest()))
 			{
 				particle_vector[i].set_localBest(particle_vector[i].get_str());
-
-
 				if (particle_vector[i].calc_fitness_particle(particle_vector[i].get_localBest())
 					< particle_vector[i].calc_fitness_particle(globalBest))
 				{
@@ -297,27 +244,19 @@ int* RWS(ga_vector &population, int *points, int* newFitness)
 {
 	int esize = static_cast<int>(GA_POPSIZE * GA_ELITRATE);
 	int numOfParents = 2 * (GA_POPSIZE - esize);
-	int *parents = new int[numOfParents];									// the selected parents
-	int* sumFitness = new int[GA_POPSIZE];								    // sum of the fitness till index i
+	//parent 
+	int *parents = new int[numOfParents];								
+	int* sumFitness = new int[GA_POPSIZE];								   
 	sumFitness[0] = newFitness[0];
+	// summing fitness
 	for (int i = 1; i < GA_POPSIZE; i++) {
 		sumFitness[i] = sumFitness[i - 1] + newFitness[i];
-
 	}
-	for (int i = 0; i < numOfParents; i++) {		// Roulette Wheel Selection 
+	//parent select
+	for (int i = 0; i < numOfParents; i++) {		
 		int j = 0;
-		while (1)
-		{
-			if (sumFitness[j] >= *(points + i))
-				break;
+		while (sumFitness[j] < *(points + i) && j < GA_POPSIZE) {
 			j++;
-
-			if (j >= GA_POPSIZE)
-
-			{
-				j = GA_POPSIZE - 1;
-				break;
-			}
 		}
 		if (j >= GA_POPSIZE)
 			j = GA_POPSIZE - 1;
@@ -326,6 +265,7 @@ int* RWS(ga_vector &population, int *points, int* newFitness)
 	return parents;
 }
 
+
 //*******************************************************************************
 //SUS function 
 
@@ -333,94 +273,165 @@ int* SUS(ga_vector &population, long totalFitness, int* newFitness)
 {
 	int esize = static_cast<int>(GA_POPSIZE * GA_ELITRATE);
 	int numOfParents = 2 * (GA_POPSIZE - esize);
-	int *parents = new int[numOfParents];			    // the selected parents
-	int distance = totalFitness / numOfParents;	        // distance between the pointers
-	int start = rand() % (distance + 1);			    // random number between 0 and distance
-	int *points = new int[numOfParents];		         // list of (sorted)random numbers from 0 to the total fitness
-
-	for (int i = 0; i < numOfParents; i++) {				// points is a (sorted) list of	random numbers														   
-		*(points + i) = start + (i * distance);		        // from 0 to total fitness with constant steps. 
+	int *parents = new int[numOfParents];	
+	// randnum is list of random integers
+	int *randnum = new int[numOfParents];
+	for (int i = 0; i < numOfParents; i++) {		    													   
+		*(randnum + i) = rand() % (totalFitness / numOfParents + 1) + (i * totalFitness / numOfParents);
 	}
-
-	return RWS(population, points, newFitness);
-
+	return RWS(population, randnum, newFitness);
 }
 
 //*******************************************************************************
-
-int* Tournament(ga_vector &population, int size)
+#define	Psize	7						// Tournament size 
+int* Tournament(ga_vector &population)
 {
 	int esize = static_cast<int>(GA_POPSIZE * GA_ELITRATE);
 	int numOfParents = 2 * (GA_POPSIZE - esize);
-	int *parents = new int[numOfParents];			    // the selected parents
-	int* players = new int[size];						// K players in the tournament
-
+	//parents
+	int *parents = new int[numOfParents];		
+	//players of the tournament
+	int* players = new int[Psize];					
+	//loop
 	for (int i = 0; i < numOfParents; i++) {
-		for (int j = 0; j < size; j++) {
+		for (int j = 0; j < Psize; j++) {
+			//random players
 			players[j] = rand() % GA_POPSIZE;
 		}
-		//playing tournament
-		int winner = players[0];
-		for (int i = 0; i < size; i++) {
-			if (population[players[i]].fitness < population[winner].fitness)
-				winner = players[i];
+		//playing the tournament
+		int win = players[0];
+		for (int s = 0; s < Psize; i++) {
+			if (population[players[i]].fitness < population[win].fitness)
+				win = players[i];
 		}
-		parents[i] = winner;
+		//parent = the winner player
+		parents[i] = win;
 	}
-
 	return parents;
 }
+
 
 //*******************************************************************************
 
 void Scaling(ga_vector &population)
 {
+	//based on lecture scale = a*f+b a=0.2 , b= 10
 	for (int i = 0; i < GA_POPSIZE; i++) {
-		// based on lecture a*f+b 
-		population[i].fitness = static_cast<unsigned int>(0.5 * population[i].fitness + 20);  // linear transformation
-	}
 
+		population[i].fitness = static_cast<unsigned int>(0.2 * population[i].fitness + 10);// linear transformation
+	}
 }
 
 //*******************************************************************************
 
 // for this we added age in ga struct
-#define MAX_AGE	10					// Maximum age of a citizen
+void updateAge(ga_vector &population,int i)
+{
+	population[i].age += 1;
+}
 
-int* Aging(ga_vector &population)
+//*******************************************************************************
+
+#define parentype    4  //parent type 
+
+int* selectParents(ga_vector &population)
 {
 	int esize = static_cast<int>(GA_POPSIZE * GA_ELITRATE);
-	int tsize = GA_TARGET.size();
 	int numOfParents = 2 * (GA_POPSIZE - esize);
-	int *parents = new int[numOfParents];			// the selected parents
+	int *parents = new int[numOfParents];			
+	//sorted numbers
+	int *points = new int[numOfParents];			
+	//calculating new fitness
+	int* newFitness = new int[GA_POPSIZE];								
+	for (int i = 0; i < GA_POPSIZE; i++) {
 
-	for (int i = esize; i < GA_POPSIZE; i++) {
-		if (population[i].age > MAX_AGE) {
-			ga_struct citizen;
-			citizen.fitness = 0;
-			citizen.age = 0;			         	 //reset age
-			citizen.str.erase();
-			for (int j = 0; j < tsize; j++)
-				citizen.str += (rand() % 90) + 32;
-			population[i] = citizen;
-		}
+		newFitness[i] = ((-1)*(population[i].fitness) + population[GA_POPSIZE - 1].fitness);
 	}
-
-	for (int i = 0; i < numOfParents; i++) {
-		parents[i] = rand() % GA_POPSIZE;
-		while (population[parents[i]].age <= 0)
-		{
-			parents[i] = rand() % GA_POPSIZE;
+	//total fitness
+	long totalFitness = 0;
+	for (int i = 0; i < GA_POPSIZE; i++) {
+		totalFitness += newFitness[i];
+	}
+	//parent type:
+	if (parentype ==1)                        
+	{
+		//RWS + Scaling 
+		Scaling(population);		          	   
+		for (int i = 0; i < numOfParents; i++) {				  															   
+			*(points + i) = rand() % (totalFitness + 1);		  
 		}
+		//sorting
+		sort(points, points + numOfParents);		
+		//calling RWS
+		parents = RWS(population, points, newFitness);			    
+	}
+	if (parentype == 2)
+	{
+		// SUS method
+		parents = SUS(population, totalFitness, newFitness);     
+	}
+	if (parentype == 3)
+	{
+		// Tournament selection
+		parents = Tournament(population);           
 	}
 	return parents;
 }
 
+//*******************************************************************************
+
+void mate(ga_vector &population, ga_vector &buffer, int PointOp)
+{
+	int esize = static_cast<int>(GA_POPSIZE * GA_ELITRATE);
+	int tsize = GA_TARGET.size(), spos, spos2, i1, i2;
+	int *parents = selectParents(population);
+	elitism(population, buffer, esize);
+	// Mate the rest
+	for (int i = esize; i < GA_POPSIZE; i++) {
+		i1 = parents[2 * (i - esize)];
+		i2 = parents[2 * (i - esize) + 1];
+		if (PointOp == 0) // Single Point Operator
+
+		{
+				spos = rand() % tsize;
+				buffer[i].str = population[i1].str.substr(0, spos) +
+				population[i2].str.substr(spos, tsize - spos);
+		}
+		if (PointOp == 1)  // Two Point Operator
+		{
+				spos = rand() % tsize;
+				spos2 = rand() % tsize;
+				buffer[i].str = population[i1].str.substr(0, std::min(spos, spos2)) +
+				population[i2].str.substr(std::min(spos, spos2), std::max(spos, spos2) - std::min(spos, spos2)) +
+				population[i1].str.substr(std::max(spos, spos2), tsize - std::max(spos, spos2));
+		}
+		if (PointOp == -1)  //// Uniform Point Operator
+		{
+				string myStr;
+				myStr.erase();
+				for (int j = 0; j < tsize; j++) {
+					spos = rand() % 2;
+
+					if (spos == 0)
+					{
+						myStr += population[i1].str.substr(j, 1);
+					}
+					if (spos == 1)
+					{
+						myStr += population[i2].str.substr(j, 1);
+					}
+				}
+				buffer[i].str = myStr;
+		}
+		if (rand() < GA_MUTATION) mutate(buffer[i]);
+		buffer[i].age = 0;
+	}
+}
 
 //*******************************************************************************
 //main function 
  
-#define PSOflag          1  // if psoflag == 1 pso algorithim will run else GA algorithim will run
+#define PSOflag          0  // if psoflag == 1 pso algorithim will run else GA algorithim will run
 
 int main()
 {
@@ -456,7 +467,7 @@ int main()
 
 		if ((*population)[0].fitness == 0) break;
 		// mate the population together
-		mate(*population, *buffer, 1);		// population,buffer, PointOp : -1 is uniform , 0 for one point , 1 for two points
+		mate(*population, *buffer,1);		// population,buffer, PointOp : -1 is uniform , 0 for one point , 1 for two points
 		swap(population, buffer);		// swap buffers
 		//clock calculation
 		clock_t end = std::clock();

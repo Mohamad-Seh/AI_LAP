@@ -17,6 +17,8 @@
 #define GA_MUTATIONRATE	0.25f		// mutation rate
 #define GA_MUTATION		RAND_MAX * GA_MUTATIONRATE
 #define GA_TARGET		std::string("Hello world!")
+#define MAX_AGE	  20					// Max age of a citizen
+#define Min_AGE	  1					// min age of a citizen
 
 
 using namespace std;				// polluting global namespace, but hey...
